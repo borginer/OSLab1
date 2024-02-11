@@ -28,7 +28,9 @@ int sys_rpg_fight(int type, int level){
     struct list_head *pos;
     struct rpg_character *entry;
 
-    list_for_each(pos, &current->character.party) {
+    // list_for_each(pos, &current->character.party) {
+    pos = &current->character.party;
+    do {
         entry = list_entry(pos, struct rpg_character, party);
         int cclass = entry->cclass;
         if (cclass == type) {
@@ -36,18 +38,25 @@ int sys_rpg_fight(int type, int level){
         } else {
             sum_strength += 1 * entry->level;
         }
-    }
+        pos = pos->next;
+    } while (pos != &current->character.party);
 
     if (sum_strength >= level) {
-        list_for_each(pos, &current->character.party) {
+        // list_for_each(pos, &current->character.party) {
+        pos = &current->character.party;
+        do {
             entry = list_entry(pos, struct rpg_character, party);
             entry->level++;
-        }
+            pos = pos->next;
+        } while (pos != &current->character.party);
     } else {
-        list_for_each(pos, &current->character.party) {
+        // list_for_each(pos, &current->character.party) {
+        pos = &current->character.party;
+        do {
             entry = list_entry(pos, struct rpg_character, party);
             entry->level = (entry->level - 1 < 0) ? 0 : entry->level - 1;  
-        }
+            pos = pos->next;
+        } while (pos != &current->character.party);
     }
     return !!(sum_strength >= level);
 }
@@ -76,7 +85,9 @@ int sys_rpg_get_stats(struct rpg_stats *stats){
     struct list_head *pos;
     struct rpg_character *entry;
 
-    list_for_each(pos, &current->character.party) {
+    // list_for_each(pos, &current->character.party) {
+    pos = &current->character.party;
+    do {
         entry = list_entry(pos, struct rpg_character, party);
         party_size++;
         if (entry->cclass == MAGE) {
@@ -84,7 +95,8 @@ int sys_rpg_get_stats(struct rpg_stats *stats){
         } else {
             fighter_levels += entry->level;
         }
-    }
+        pos = pos->next;
+    } while (pos != &current->character.party);
 
     out.party_size = party_size;
     out.fighter_levels = fighter_levels;
@@ -96,6 +108,7 @@ int sys_rpg_get_stats(struct rpg_stats *stats){
         return 0;
     }
 }
+
 int sys_rpg_join(pid_t player){
     task_t *player_task = find_task_by_pid(player);
     if (!player_task) {
