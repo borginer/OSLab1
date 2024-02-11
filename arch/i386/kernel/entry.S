@@ -650,10 +650,10 @@ ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_sched_setaffinity)
 	.long SYMBOL_NAME(sys_sched_getaffinity)
 
-	.long SYMBOL_NAME(rpg_create_character)
-	.long SYMBOL_NAME(rpg_fight)
-	.long SYMBOL_NAME(rpg_get_stats)
-	.long SYMBOL_NAME(rpg_join)
+	.long SYMBOL_NAME(sys_rpg_create_character)
+	.long SYMBOL_NAME(sys_rpg_fight)
+	.long SYMBOL_NAME(sys_rpg_get_stats)
+	.long SYMBOL_NAME(sys_rpg_join)
 
 	.rept NR_syscalls-(.-sys_call_table)/4
 		.long SYMBOL_NAME(sys_ni_syscall)
