@@ -15,6 +15,7 @@ int sys_rpg_create_character(int cclass){
     INIT_LIST_HEAD(&current->character.party);
     current->character.cclass = cclass;
     current->character.level = 1;
+    return 0;
 }
 
 #define ORC 0
