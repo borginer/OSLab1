@@ -8,7 +8,7 @@
 int sys_rpg_create_character(int cclass){
     if (cclass != 0 && cclass != 1) {
         return -EINVAL;
-    } else if (current->character.party.next == NULL) {
+    } else if (current->character.party.next != NULL) {
         return -EEXIST;
     }
 
