@@ -90,7 +90,7 @@ int sys_rpg_get_stats(struct rpg_stats *stats){
     out.fighter_levels = fighter_levels;
     out.mage_levels = mage_levels;
 
-    if (copy_from_user(stats, &out, sizeof(out)) > 0) {
+    if (copy_to_user(stats, &out, sizeof(out)) > 0) {
         return -EFAULT;
     } else {
         return 0;
