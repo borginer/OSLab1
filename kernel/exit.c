@@ -498,7 +498,8 @@ NORET_TYPE void do_exit(long code)
 	tsk->flags |= PF_EXITING;
 
 	// MY CODE
-	list_del(&tsk->character.party);
+	if (tsk->character.party.prev != NULL)
+		list_del(&tsk->character.party);
 
 	del_timer_sync(&tsk->real_timer);
 
