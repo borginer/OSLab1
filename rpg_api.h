@@ -86,7 +86,7 @@ int rpg_get_stats(struct rpg_stats *stats)
     return res;
 }
 
-int rpg_join(pid_t player)
+int rpg_join(int player)
 {
     int res;
     __asm__
