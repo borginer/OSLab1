@@ -12,7 +12,7 @@ int sys_rpg_create_character(int cclass){
         return -EEXIST;
     }
 
-    INIT_LIST_HEAD(current->character.party);
+    INIT_LIST_HEAD(&current->character.party);
     current->character.cclass = cclass;
     current->character.level = 1;
 }
@@ -44,7 +44,7 @@ int sys_rpg_fight(int type, int level){
             entry->level++;
         }
     } else {
-        list_for_each(pos, &current->character->party) {
+        list_for_each(pos, &current->character.party) {
             entry = list_entry(pos, struct rpg_character, party);
             entry->level = (entry->level - 1 < 0) ? 0 : entry->level - 1;  
         }
@@ -90,7 +90,7 @@ int sys_rpg_get_stats(struct rpg_stats *stats){
     out.fighter_levels = fighter_levels;
     out.mage_levels = mage_levels;
 
-    if (copy_from_user(stats, &out, sizeof(out) > 0) {
+    if (copy_from_user(stats, &out, sizeof(out)) > 0) {
         return -EFAULT;
     } else {
         return 0;
@@ -100,7 +100,7 @@ int sys_rpg_join_party(pid_t player){
     task_t *player_task = find_task_by_pid(player);
     if (!player_task) {
         return -ESRCH;
-    } else if (current->character.party.prev == NULL || player_task->character.part.prev == NULL) {
+    } else if (current->character.party.prev == NULL || player_task->character.party.prev == NULL) {
         return -EINVAL;
     }
     list_del(&current->character.party);
