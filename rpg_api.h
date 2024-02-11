@@ -93,7 +93,7 @@ int rpg_join(pid_t player)
     (
         "pushl %%eax;"
         "pushl %%ebx;"
-        "movl $243, %%eax;"
+        "movl $246, %%eax;"
         "movl %1, %%ebx;"
         "int $0x80;"
         "movl %%eax,%0;"
