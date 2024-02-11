@@ -96,7 +96,7 @@ int sys_rpg_get_stats(struct rpg_stats *stats){
         return 0;
     }
 }
-int sys_rpg_join_party(pid_t player){
+int sys_rpg_join(pid_t player){
     task_t *player_task = find_task_by_pid(player);
     if (!player_task) {
         return -ESRCH;
