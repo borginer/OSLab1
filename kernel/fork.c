@@ -614,8 +614,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	*p = *current;
 
 	// MY CODE
-	p->character.party.prev = NULL;
-	p->character.party.next = NULL;
+	p->character = NULL;
+	p->party = NULL;
 
 	p->tux_info = NULL;
 	p->cpus_allowed_mask &= p->cpus_allowed;

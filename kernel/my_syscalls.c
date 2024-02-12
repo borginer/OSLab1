@@ -4,63 +4,8 @@
 
 #define FIGHTER 0
 #define MAGE 1
-
-int sys_rpg_create_character(int cclass){
-    if (cclass != 0 && cclass != 1) {
-        return -EINVAL;
-    } else if (current->character.party.next != NULL) {
-        return -EEXIST;
-    }
-
-    INIT_LIST_HEAD(&current->character.party);
-    current->character.cclass = cclass;
-    current->character.level = 1;
-    return 0;
-}
-
 #define ORC 0
 #define DEMON 1
-
-int sys_rpg_fight(int type, int level){
-    if ((type != 0 && type != 1) || (level < 0) || (current->character.party.prev == NULL)) {
-        return -EINVAL;
-    }
-    int sum_strength = 0;
-    struct list_head *pos;
-    struct rpg_character *entry;
-
-    // list_for_each(pos, &current->character.party) {
-    pos = &current->character.party;
-    do {
-        entry = list_entry(pos, struct rpg_character, party);
-        int cclass = entry->cclass;
-        if (cclass == type) {
-            sum_strength += 2 * entry->level;
-        } else {
-            sum_strength += 1 * entry->level;
-        }
-        pos = pos->next;
-    } while (pos != &current->character.party);
-
-    if (sum_strength >= level) {
-        // list_for_each(pos, &current->character.party) {
-        pos = &current->character.party;
-        do {
-            entry = list_entry(pos, struct rpg_character, party);
-            entry->level++;
-            pos = pos->next;
-        } while (pos != &current->character.party);
-    } else {
-        // list_for_each(pos, &current->character.party) {
-        pos = &current->character.party;
-        do {
-            entry = list_entry(pos, struct rpg_character, party);
-            entry->level = (entry->level - 1 < 0) ? 0 : entry->level - 1;  
-            pos = pos->next;
-        } while (pos != &current->character.party);
-    }
-    return !!(sum_strength >= level);
-}
 
 struct rpg_stats {
     int cclass;
@@ -69,6 +14,65 @@ struct rpg_stats {
     int fighter_levels;
     int mage_levels;
 };
+
+int sys_rpg_create_character(int cclass){
+    if (cclass != 0 && cclass != 1) {
+        return -EINVAL;
+    } else if (current->character != NULL) {
+        return -EEXIST;
+    }
+
+    struct rpg_character *character = vmalloc(sizeof(struct rpg_character));
+    if (!character) {
+        return -1;
+    }
+    struct list_head *party = vmalloc(sizeof(struct list_head));
+    if (!party) {
+        vfree(character);
+        return -1;
+    }
+
+    INIT_LIST_HEAD(party);
+    list_add(character->list, party);   
+    character.cclass = cclass;
+    character.level = 1;
+    current->character = character;
+    current->party = party;
+    return 0;
+}
+
+int sys_rpg_fight(int type, int level){
+    if ((type != 0 && type != 1) || (level < 0) || (current->character == NULL)) {
+        return -EINVAL;
+    }
+    
+    int sum_strength = 0;
+    struct list_head *pos;
+    struct rpg_character *entry;
+
+    list_for_each(pos, current->party) {
+        entry = list_entry(pos, struct rpg_character, list);
+        if (entry->cclass == type) {
+            sum_strength += 2 * entry->level;
+        } else {
+            sum_strength += 1 * entry->level;
+        }
+    }
+
+    if (sum_strength >= level) {
+        list_for_each(pos, current->party) {
+            entry = list_entry(pos, struct rpg_character, list);
+            entry->level++;
+        }
+    } else {
+        list_for_each(pos, current->party) {
+            entry = list_entry(pos, struct rpg_character, list);
+            entry->level = (entry->level - 1 < 0) ? 0 : entry->level - 1;  
+        }
+    }
+    
+    return !!(sum_strength >= level);
+}
 
 int sys_rpg_get_stats(struct rpg_stats *stats){
     if (stats == NULL || current->character.party.prev == NULL) {
@@ -86,18 +90,15 @@ int sys_rpg_get_stats(struct rpg_stats *stats){
     struct list_head *pos;
     struct rpg_character *entry;
 
-    // list_for_each(pos, &current->character.party) {
-    pos = &current->character.party;
-    do {
-        entry = list_entry(pos, struct rpg_character, party);
+    list_for_each(pos, current->party) {
+        entry = list_entry(pos, struct rpg_character, list);
         party_size++;
         if (entry->cclass == MAGE) {
             mage_levels += entry->level;
         } else {
             fighter_levels += entry->level;
         }
-        pos = pos->next;
-    } while (pos != &current->character.party);
+    }
 
     out.party_size = party_size;
     out.fighter_levels = fighter_levels;
@@ -114,10 +115,13 @@ int sys_rpg_join(pid_t player){
     task_t *player_task = find_task_by_pid(player);
     if (!player_task) {
         return -ESRCH;
-    } else if (current->character.party.prev == NULL || player_task->character.party.prev == NULL) {
+    } else if (current->character == NULL || player_task->character == NULL) {
         return -EINVAL;
     }
-    list_del(&current->character.party);
-    list_add(&current->character.party, &player_task->character.party);
+    list_del(&current->character->list);
+    if (list_empty(current->party)) {
+        vfree(current->party);
+    }
+    list_add(&current->character->list, player_task->party);
     return 0;
 }

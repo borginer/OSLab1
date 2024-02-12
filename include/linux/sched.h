@@ -320,7 +320,7 @@ typedef struct prio_array prio_array_t;
 
 // Character Struct OS Lab 1
 struct rpg_character{
-	struct list_head party;
+	struct list_head list;
 	int cclass;
 	int level;
 };
@@ -460,7 +460,8 @@ struct task_struct {
 	void *journal_info;
 
 /* -------------------------------------------------- LAB 1 -------------------------------------------------- */
-	struct rpg_character character;
+	struct rpg_character *character;
+    struct list_head *party;
 /* ------------------------------------------------ LAB 1 END ------------------------------------------------- */
 
 };
