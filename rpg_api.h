@@ -2,6 +2,7 @@
 #define RPG_API
 
 #include <unistd.h>
+#include <errno.h>
 
 struct rpg_stats {
     int cclass;
