@@ -5,6 +5,8 @@
 #define FIGHTER 0
 #define MAGE 1
 
+// added rpg_character struct in task_struct in sched, all the data needed is stored there.
+
 int sys_rpg_create_character(int cclass){
     if (cclass != 0 && cclass != 1) {
         return -EINVAL;
@@ -29,12 +31,11 @@ int sys_rpg_fight(int type, int level){
     struct list_head *pos;
     struct rpg_character *entry;
 
-    // list_for_each(pos, &current->character.party) {
     pos = &current->character.party;
     do {
         entry = list_entry(pos, struct rpg_character, party);
         int cclass = entry->cclass;
-        if (cclass == type) {
+        if (cclass == type) { // mage and demon / orc and fighter are the same value
             sum_strength += 2 * entry->level;
         } else {
             sum_strength += 1 * entry->level;
@@ -43,7 +44,6 @@ int sys_rpg_fight(int type, int level){
     } while (pos != &current->character.party);
 
     if (sum_strength >= level) {
-        // list_for_each(pos, &current->character.party) {
         pos = &current->character.party;
         do {
             entry = list_entry(pos, struct rpg_character, party);
@@ -51,7 +51,6 @@ int sys_rpg_fight(int type, int level){
             pos = pos->next;
         } while (pos != &current->character.party);
     } else {
-        // list_for_each(pos, &current->character.party) {
         pos = &current->character.party;
         do {
             entry = list_entry(pos, struct rpg_character, party);
@@ -86,7 +85,6 @@ int sys_rpg_get_stats(struct rpg_stats *stats){
     struct list_head *pos;
     struct rpg_character *entry;
 
-    // list_for_each(pos, &current->character.party) {
     pos = &current->character.party;
     do {
         entry = list_entry(pos, struct rpg_character, party);
